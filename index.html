@@ -1,50 +1,510 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <title>HSXL Chatbot</title>
+  <meta charset="UTF-8">
+  <title>Chatbot Học Tập</title>
   <style>
-    body { font-family: Arial; margin: 20px; background: #f8f8f8; }
-    #chat { background: white; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
-    .user { color: blue; margin: 5px 0; }
-    .bot { color: green; margin: 5px 0; }
-    #input-area { margin-top: 10px; display: flex; }
-    #message { flex: 1; padding: 10px; }
-    #send { padding: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chatWrapper {
+      width: 400px;
+      height: 600px;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    #chatContainer {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .message {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 15px;
+      margin: 5px 0;
+      display: flex;
+      align-items: flex-end;
+      word-wrap: break-word;
+    }
+    .user {
+      background: #dcf8c6;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .bot {
+      background: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    #inputWrapper {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background: #f0f0f0;
+    }
+    #userInput {
+      flex: 1;
+      padding: 8px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    #sendBtn, #clearBtn {
+      margin-left: 5px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 20px;
+      background-color: #128c7e;
+      color: white;
+      cursor: pointer;
+    }
+    #clearBtn {
+      background-color: #d9534f;
+    }
+    #sendBtn:hover { background-color: #075e54; }
+    #clearBtn:hover { background-color: #c9302c; }
   </style>
 </head>
 <body>
-  <h2>HSXL Chatbot</h2>
-  <div id="chat"></div>
-  <div id="input-area">
-    <input id="message" placeholder="Nhập câu hỏi...">
-    <button id="send">Gửi</button>
+  <div id="chatWrapper">
+    <div id="chatContainer"></div>
+    <div id="inputWrapper">
+      <input type="text" id="userInput" placeholder="Nhập câu hỏi...">
+      <button id="sendBtn">Gửi</button>
+      <button id="clearBtn">Xóa chat</button>
+    </div>
   </div>
 
   <script>
-    const chat = document.getElementById("chat");
-    const messageInput = document.getElementById("message");
-    const sendBtn = document.getElementById("send");
+    const chatBox = document.getElementById('chatContainer');
+    const input = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-    sendBtn.onclick = async function() {
-      const text = messageInput.value.trim();
-      if (!text) return;
-      chat.innerHTML += `<div class='user'><b>Bạn:</b> ${text}</div>`;
-      messageInput.value = "";
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
 
-      chat.innerHTML += `<div class='bot'><b>Bot:</b> đang trả lời...</div>`;
-      chat.scrollTop = chat.scrollHeight;
+    function renderChat() {
+      chatBox.innerHTML = '';
+      chatHistory.forEach(msg => {
+        const div = document.createElement('div');
+        div.classList.add('message', msg.sender);
 
-      const res = await fetch("/.netlify/functions/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
+        if(msg.sender === 'bot') {
+          const avatar = document.createElement('img');
+          avatar.src = 'https://i.imgur.com/6rk9YwM.png'; // avatar bot
+          avatar.classList.add('avatar');
+          div.appendChild(avatar);
+        }
+
+        const text = document.createElement('span');
+        text.textContent = msg.text;
+        div.appendChild(text);
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Học Tập</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chatWrapper {
+      width: 400px;
+      height: 600px;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    #chatContainer {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .message {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 15px;
+      margin: 5px 0;
+      display: flex;
+      align-items: flex-end;
+      word-wrap: break-word;
+    }
+    .user {
+      background: #dcf8c6;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .bot {
+      background: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    #inputWrapper {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background: #f0f0f0;
+    }
+    #userInput {
+      flex: 1;
+      padding: 8px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    #sendBtn, #clearBtn {
+      margin-left: 5px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 20px;
+      background-color: #128c7e;
+      color: white;
+      cursor: pointer;
+    }
+    #clearBtn {
+      background-color: #d9534f;
+    }
+    #sendBtn:hover { background-color: #075e54; }
+    #clearBtn:hover { background-color: #c9302c; }
+  </style>
+</head>
+<body>
+  <div id="chatWrapper">
+    <div id="chatContainer"></div>
+    <div id="inputWrapper">
+      <input type="text" id="userInput" placeholder="Nhập câu hỏi...">
+      <button id="sendBtn">Gửi</button>
+      <button id="clearBtn">Xóa chat</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatContainer');
+    const input = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+
+    function renderChat() {
+      chatBox.innerHTML = '';
+      chatHistory.forEach(msg => {
+        const div = document.createElement('div');
+        div.classList.add('message', msg.sender);
+
+        if(msg.sender === 'bot') {
+          const avatar = document.createElement('img');
+          avatar.src = 'https://i.imgur.com/6rk9YwM.png'; // avatar bot
+          avatar.classList.add('avatar');
+          div.appendChild(avatar);
+        }
+
+        const text = document.createElement('span');
+        text.textContent = msg.text;
+        div.appendChild(text);
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Học Tập</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chatWrapper {
+      width: 400px;
+      height: 600px;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    #chatContainer {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .message {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 15px;
+      margin: 5px 0;
+      display: flex;
+      align-items: flex-end;
+      word-wrap: break-word;
+    }
+    .user {
+      background: #dcf8c6;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .bot {
+      background: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    #inputWrapper {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background: #f0f0f0;
+    }
+    #userInput {
+      flex: 1;
+      padding: 8px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    #sendBtn, #clearBtn {
+      margin-left: 5px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 20px;
+      background-color: #128c7e;
+      color: white;
+      cursor: pointer;
+    }
+    #clearBtn {
+      background-color: #d9534f;
+    }
+    #sendBtn:hover { background-color: #075e54; }
+    #clearBtn:hover { background-color: #c9302c; }
+  </style>
+</head>
+<body>
+  <div id="chatWrapper">
+    <div id="chatContainer"></div>
+    <div id="inputWrapper">
+      <input type="text" id="userInput" placeholder="Nhập câu hỏi...">
+      <button id="sendBtn">Gửi</button>
+      <button id="clearBtn">Xóa chat</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatContainer');
+    const input = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+
+    function renderChat() {
+      chatBox.innerHTML = '';
+      chatHistory.forEach(msg => {
+        const div = document.createElement('div');
+        div.classList.add('message', msg.sender);
+
+        if(msg.sender === 'bot') {
+          const avatar = document.createElement('img');
+          avatar.src = 'https://i.imgur.com/6rk9YwM.png'; // avatar bot
+          avatar.classList.add('avatar');
+          div.appendChild(avatar);
+        }
+
+        const text = document.createElement('span');
+        text.textContent = msg.text;
+        div.appendChild(text);
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Học Tập</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chatWrapper {
+      width: 400px;
+      height: 600px;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    #chatContainer {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .message {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 15px;
+      margin: 5px 0;
+      display: flex;
+      align-items: flex-end;
+      word-wrap: break-word;
+    }
+    .user {
+      background: #dcf8c6;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .bot {
+      background: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    #inputWrapper {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background: #f0f0f0;
+    }
+    #userInput {
+      flex: 1;
+      padding: 8px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    #sendBtn, #clearBtn {
+      margin-left: 5px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 20px;
+      background-color: #128c7e;
+      color: white;
+      cursor: pointer;
+    }
+    #clearBtn {
+      background-color: #d9534f;
+    }
+    #sendBtn:hover { background-color: #075e54; }
+    #clearBtn:hover { background-color: #c9302c; }
+  </style>
+</head>
+<body>
+  <div id="chatWrapper">
+    <div id="chatContainer"></div>
+    <div id="inputWrapper">
+      <input type="text" id="userInput" placeholder="Nhập câu hỏi...">
+      <button id="sendBtn">Gửi</button>
+      <button id="clearBtn">Xóa chat</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatContainer');
+    const input = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+
+    function renderChat() {
+      chatBox.innerHTML = '';
+      chatHistory.forEach(msg => {
+        const div = document.createElement('div');
+        div.classList.add('message', msg.sender);
+
+        if(msg.sender === 'bot') {
+          const avatar = document.createElement('img');
+          avatar.src = 'https://i.imgur.com/6rk9YwM.png'; // avatar bot
+          avatar.classList.add('avatar');
+          div.appendChild(avatar);
+        }
+
+        const text = document.createElement('span');
+        text.textContent = msg.text;
+        div.appendChild(text);
+chatBox.appendChild(div);
       });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-      const data = await res.json();
-      chat.lastElementChild.innerHTML = `<b>Bot:</b> ${data.reply || "Lỗi khi trả lời"}`;
-      chat.scrollTop = chat.scrollHeight;
-    };
+    renderChat();
+
+    function addMessage(text, sender) {
+      chatHistory.push({ text, sender });
+      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+      renderChat();
+    }
+
+    async function sendMessage() {
+      const userText = input.value.trim();
+      if (!userText) return;
+      addMessage(userText, 'user');
+      input.value = '';
+
+      try {
+        const res = await fetch(`/.netlify/functions/chat?message=${encodeURIComponent(userText)}`);
+        const data = await res.json();
+        addMessage(data.reply, 'bot');
+      } catch (err) {
+        addMessage("Lỗi server, vui lòng thử lại.", 'bot');
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+    clearBtn.addEventListener('click', () => {
+      chatHistory = [];
+      localStorage.removeItem('chatHistory');
+      renderChat();
+    });
   </script>
 </body>
 </html>
